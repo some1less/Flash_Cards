@@ -9,6 +9,6 @@ public class CapitDispFormatter implements DisplayFormatter{
 
     @Override
     public String format(Entry entry) {
-        return entry.toString().toUpperCase();
+        return entry.toString().toLowerCase();
     }
 }

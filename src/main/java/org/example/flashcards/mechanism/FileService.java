@@ -1,46 +1,70 @@
 package org.example.flashcards.mechanism;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 @Service
-public class FileService {
+public class FileService implements FileServiceDependency {
 
-    private String filename;
-    private EntryRepository entryRepository;
+    private final String fileName;
+    private final IEntryRepository entryRepository;
+    private final DisplayFormatter displayFormatter;
 
-    public FileService(String filename, EntryRepository entryRepository) {
-        this.filename = filename;
+    @Autowired
+    public FileService(@Value("${pl.edu.pja.tpo02.filename}") String fileName,
+                       IEntryRepository entryRepository,
+                       DisplayFormatter displayFormatter) {
+        this.fileName = fileName;
         this.entryRepository = entryRepository;
+        this.displayFormatter = displayFormatter;
     }
 
-    public void loadEntries(){
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream(filename),
+    @Override
+    public void loadData() {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                getClass().getClassLoader().getResourceAsStream(fileName),
                 StandardCharsets.UTF_8))) {
 
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length != 3) {
-
                     System.out.println("Each line must contain exactly 3 words separated by commas");
-
                 } else {
-
-                    Entry entry = new Entry(parts[0], parts[1], parts[2]);
+                    Entry entry = new Entry(parts[0].trim(), parts[1].trim(), parts[2].trim());
                     entryRepository.add(entry);
-
+                    System.out.println("Word added: " + displayFormatter.format(entry));
                 }
             }
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void saveData(Entry entry) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
+            writer.write(entry.getPolish() + "," + entry.getEnglish() + "," + entry.getGerman());
+            writer.newLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void addData(String entryLine) {
+        String[] parts = entryLine.split(",");
+        if (parts.length != 3) {
+            System.out.println("Each line must contain exactly 3 words separated by commas");
+            return;
+        }
+        Entry tmp = new Entry(parts[0].trim(), parts[1].trim(), parts[2].trim());
+        entryRepository.add(tmp);
+        System.out.println("Word added: " + displayFormatter.format(tmp));
+        saveData(tmp);
     }
 }

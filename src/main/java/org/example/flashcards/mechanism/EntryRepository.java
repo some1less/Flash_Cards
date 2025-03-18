@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Random;
 
 @Repository
-public class EntryRepository implements RepositoryContract{
+public class EntryRepository implements RepositoryContract, IEntryRepository {
 
     private final List<Entry> entries = new ArrayList<>();;
 
