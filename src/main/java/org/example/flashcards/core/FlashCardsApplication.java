@@ -1,4 +1,4 @@
-package org.example.flashcards;
+package org.example.flashcards.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
