@@ -25,10 +25,11 @@ public class FileService implements FileServiceDependency {
 
     @Override
     public void loadData() {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-                getClass().getClassLoader().getResourceAsStream(fileName),
-                StandardCharsets.UTF_8))) {
-
+        InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(fileName);
+        if (resourceStream == null) {
+            throw new RuntimeException("Resource not found: " + fileName);
+        }
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(resourceStream, StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -44,6 +45,7 @@ public class FileService implements FileServiceDependency {
             throw new RuntimeException(e);
         }
     }
+
 
     @Override
     public void saveData(Entry entry) {

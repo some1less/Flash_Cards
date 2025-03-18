@@ -41,4 +41,9 @@ public class EntryRepository implements RepositoryContract, IEntryRepository {
 
     }
 
+    @Override
+    public List<Entry> getAll() {
+        return new ArrayList<>(entries);
+    }
+
 }

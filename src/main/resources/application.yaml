@@ -3,4 +3,4 @@ spring:
     location: logo.txt
     charset: UTF-8
   profiles:
-    active: default
+    active: original
